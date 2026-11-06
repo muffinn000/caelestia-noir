@@ -1,0 +1,37 @@
+# NOIR / two-line monochrome prompt
+add_newline = true
+format = "$directory$git_branch$git_status$cmd_duration$line_break$character"
+right_format = "$time"
+
+[directory]
+style = "bold white"
+truncation_length = 3
+truncate_to_repo = true
+read_only = " 󰌾"
+read_only_style = "white"
+format = "[$path]($style)[$read_only]($read_only_style) "
+
+[git_branch]
+symbol = " "
+style = "bright-black"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "white"
+format = '([$all_status$ahead_behind]($style) )'
+
+[cmd_duration]
+min_time = 2000
+style = "bright-black"
+format = "[$duration]($style) "
+
+[character]
+success_symbol = "[❯](bold white)"
+error_symbol = "[×](bold underline white)"
+vimcmd_symbol = "[❮](white)"
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bright-black"
+format = "[$time]($style)"

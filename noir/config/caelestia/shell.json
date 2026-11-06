@@ -1,0 +1,34 @@
+{
+    "appearance": {
+        "transparency": {
+            "enabled": false
+        },
+        "font": {
+            "body": {
+                "family": "Google Sans Flex"
+            },
+            "label": {
+                "family": "Google Sans Flex"
+            },
+            "mono": {
+                "family": "JetBrainsMono Nerd Font"
+            }
+        }
+    },
+    "lock": {
+        "enableFprint": false,
+        "enableHowdy": false
+    },
+    "services": {
+        "weatherLocation": "Chisinau",
+        "smartScheme": false
+    },
+    "bar": {
+        "persistent": false,
+        "showOnHover": false
+    },
+    "border": {
+        "thickness": 0,
+        "rounding": 12
+    }
+}

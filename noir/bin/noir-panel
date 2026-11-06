@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export QT_QPA_PLATFORM=wayland
+panel_config="${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/purple"
+
+if command -v qs >/dev/null 2>&1; then
+    exec qs -p "$panel_config" -n -d
+elif command -v quickshell >/dev/null 2>&1; then
+    exec quickshell -p "$panel_config" -n -d
+fi
+
+# NixOS can expose Caelestia without putting the Quickshell binary on PATH.
+shopt -s nullglob
+candidates=(/nix/store/*-quickshell-wrapped-*/bin/quickshell)
+if ((${#candidates[@]})); then
+    exec "${candidates[0]}" -p "$panel_config" -n -d
+fi
+printf '%s\n' 'NOIR: install Quickshell and put qs or quickshell on PATH.' >&2
+exit 1

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if command -v polkit-gnome-authentication-agent-1 >/dev/null 2>&1; then
+    exec polkit-gnome-authentication-agent-1
+fi
+shopt -s nullglob
+candidates=(
+    /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+    /usr/libexec/polkit-gnome-authentication-agent-1
+    /nix/store/*-polkit-gnome-*/libexec/polkit-gnome-authentication-agent-1
+)
+for agent in "${candidates[@]}"; do
+    if [[ -x "$agent" ]]; then exec "$agent"; fi
+done
+printf '%s\n' 'NOIR: install the polkit-gnome authentication agent.' >&2
+exit 1

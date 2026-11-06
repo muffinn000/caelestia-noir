@@ -1,262 +1,70 @@
-# caelestia
+# NOIR — Caelestia, in black and white
 
-This is the main repo of the Caelestia dotfiles and contains user configs for
-various apps.
+A monochrome Hyprland desktop based on [Caelestia](https://github.com/caelestia-dots/caelestia), with a custom Quickshell panel, desktop widgets and original orbital wallpaper.
 
-> [!IMPORTANT]
-> The legacy `install.fish` script in this repo has been removed in favour
-> of the [CLI][cli-repo]'s install command.
->
-> If you have an existing installation with the legacy script, please update
-> the CLI and run the install command to complete the migration.
+![NOIR desktop](noir/preview.png)
 
-> [!IMPORTANT]
-> We have switched to using Lua for the Hyprland config!
-> For everyone with a custom `~/.config/caelestia/hypr-user.conf`
-> or `~/.config/caelestia/hypr-vars.conf`, please convert it to Lua
-> either manually or using one of the available converters online.
->
-> For more information on using these files, see the [Configuring](#configuring) section.
+## What is included
 
-## Installation (Arch Linux)
+- Floating panel on both monitors, with workspace indicators, clock, memory usage, media controls, audio, notifications and session menu.
+- Large desktop clock, focus/break timer with persistent state, and a task list.
+- Grayscale palette, thin window borders, soft shadows and short animations.
+- Matching Foot, Fish, Starship, Fuzzel, GTK and Qt configuration.
+- Original 3840 × 2160 wallpaper, editable SVG and palette.
+- The current US/Russian keyboard layout, game rules and tablet mapping.
 
-Install the CLI from the AUR, then run `caelestia install`.
+The original Caelestia files and Git history are retained. The NOIR profile is in [`noir/`](noir/); the original documentation is in [README.upstream.md](README.upstream.md). This fork changes the dotfiles and adds a separate panel; it uses the existing Caelestia shell and CLI.
 
-For example:
+## Requirements
 
-```sh
-paru -S caelestia-cli
-caelestia install
+Tested on NixOS with Hyprland 0.55.4 using Lua configuration, Quickshell 0.3.2, and Caelestia shell 1.0.0. Start from a working Caelestia installation. This repository does not install system packages or rebuild NixOS.
+
+Use Python 3.11+, Fish, Foot, Starship, Fuzzel, Quickshell, Caelestia CLI/shell, `notify-send`, and a working PipeWire session. The profile uses **Google Sans Flex**, **JetBrainsMono Nerd Font**, **adw-gtk3-dark**, **Darkly/qtengine**, and the **Bibata Modern Ice** cursor. Install these separately or change their names in the configs. Standard XDG home directories are used.
+
+## Install the current profile
+
+Clone this fork and enter its directory, then inspect the destination list:
+
+```bash
+python3 noir/install.py --check
+python3 noir/install.py --dry-run
 ```
 
-### Manual installation
+This is a snapshot of a particular desktop. Before installing on another computer, edit [`noir/config/caelestia/hypr-user.lua`](noir/config/caelestia/hypr-user.lua): the main monitor is **DP-1, 1920 × 1080 at 180 Hz**, and the second monitor is **HDMI-A-1, 1440 × 900**, positioned to the left. The file also contains CS2/osu! rules, Wacom/OTD mapping and an OTD service startup. Desktop widgets select DP-1, falling back to the first available screen. Weather and the clock label use Chișinău.
 
-Clone this repo, then go through [the manifest](/manifest.toml) and install all packages from the
-components that you want to enable, then copy all the entries from those components.
-
-e.g. for the hyprland component:
-
-```sh
-git clone https://github.com/caelestia-dots/caelestia.git
-cd caelestia
-sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk ttf-jetbrains-mono-nerd
-mkdir -p $XDG_CONFIG_HOME/hypr
-cp -r hypr/. $XDG_CONFIG_HOME/hypr/
+```bash
+python3 noir/install.py
 ```
 
-## Updating
+The installer backs up every file it replaces under `~/.local/state/noir/backups/`, then installs the profile. It does not reload Hyprland or run system commands. Log out and back in, or apply the UI in the current session:
 
-Use `caelestia update` to perform a full system update and update the dots.
-
-## Usage
-
-> [!NOTE]
-> These dots do not contain a login manager (for now), so you must install a
-> login manager yourself unless you want to log in from a TTY. I recommend
-> [`greetd`](https://sr.ht/~kennylevinsen/greetd) with
-> [`tuigreet`](https://github.com/apognu/tuigreet); however, you can use
-> any login manager you want.
-
-## Configuring
-
-> [!CAUTION]
-> You should never modify any files inside `~/.config/hypr/`, as this will cause conflicts during updates to the dots.
->
-> Any personal changes should be made in `~/.config/caelestia/hypr-user.lua` or `hypr-vars.lua`, as
-> the installation/update workflows never modify these files. Writing your own changes to files in `~/.config/hypr/`
-> will prevent new updates from being applied, and you will have to reconcile conflicts every time you update manually.
-
-### hypr-vars.lua
-
-Most default Hyprland values can be modified by overriding variables in `~/.config/caelestia/hypr-vars.lua`. You can use this file to set
-default apps, keybinds, mouse cursor, window decorations, and much more.
-Use the [`variables.lua`](hypr/variables.lua) file as a reference for all available variables and their default values.
-
-Example usage for `hypr-vars.lua`:
-
-```lua
-return {
-  -- Changing default apps:
-  browser          = "zen-browser",    -- Change default browser to Zen
-  editor           = "code",           -- Change default editor to Code
-
-  -- Changing window/decoration properties:
-  blurEnabled      = false,            -- Disable window blur
-  windowBorderSize = 3,                -- Increase window border size (default: 1)
-
-  -- Changing keybinds:
-  kbTerminal       = "SUPER + Return", -- Change the keybind for opening terminal
-}
+```bash
+~/.local/bin/noir-panel
+hyprctl reload config-only
 ```
 
-### hypr-user.lua
+The panel and polkit launchers detect available executables rather than embedding a particular Nix store hash. Existing tasks and timer state stay in `~/.local/state/purple-desktop/`; that legacy directory name is retained for compatibility. Runtime task contents are not part of the repository.
 
-You can put any custom Hyprland configuration in `~/.config/caelestia/hypr-user.lua`. This file is loaded at the end of the Hyprland
-loading sequence. This allows you to customise the behavior of Hyprland outside of the premade configs, including monitor layout, additional
-keybinds, and window rules. It is preferable to use `hypr-vars.lua` for changes to options that the dots already manage
-(e.g. keybinds, window borders, etc.). Still, for configuration that isn't covered by dots or needs to be managed outside variables,
-any changes should be made in `hypr-user.lua`.
-You can read more about configuring Hyprland on their [wiki](https://wiki.hypr.land/Configuring/Start/).
+## Restore
 
-### Additional configuration
+Use the backup path printed by the installer:
 
-Caelestia is a multifaceted ecosystem comprising the dotfiles (this repo), the [shell][shell-repo], and the [CLI][cli-repo].
-The shell’s configuration is managed by `~/.config/caelestia/shell.json`, which modifies the shell’s behavior.
-The CLI config file (`~/.config/caelestia/cli.json`) lets you adjust the CLI’s theming and handling of special workspaces.
-You can find more information on configuring the shell and the CLI in their respective repos.
+```bash
+python3 noir/install.py --restore ~/.local/state/noir/backups/<timestamp>
+```
 
-## Default keybinds
+Log out and back in after restoring to restart the original panel. The restore operation leaves task contents and timer state intact.
 
-> [!TIP]
-> All keybinds can be customised by overriding their corresponding variables in `hypr-vars.lua` (excluding the shell restart/kill binds).
-> See [Configuring](#configuring) for more information.
+## Controls and checks
 
-### Launcher
+The diamond opens applications; numbered buttons switch workspaces; the clock opens the dashboard. Scroll over the volume icon to adjust volume. The timer supports focus/break modes, pause, reset and adding five minutes. Click a task to complete it.
 
-| Keybind                   | Action        |
-| ------------------------- | ------------- |
-| `Super` (press & release) | Open launcher |
+The top panel sits above Caelestia's transparent edge gesture region, so buttons work on empty workspaces regardless of process startup order. It hides over fullscreen windows.
 
----
+The current desktop passed 14 real Wayland pointer click checks across both monitors, covering applications, dashboard, clock, audio menu, notifications, session menu and workspace switching. Hyprland reports no config errors; Foot, Fish and Starship configuration checks pass. These runtime checks cover the original NixOS machine; other distributions have not been tested.
 
-### Workspaces
+## Updates and license
 
-| Keybind                                                                                | Action                                   |
-| -------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `Super + 1~9, 0`                                                                       | Go to workspace 1~10                     |
-| `Super + Alt + 1~9, 0`                                                                 | Move window to workspace 1~10            |
-| `Ctrl + Super + 1~9, 0`                                                                | Go to workspace group (×10)              |
-| `Super + Shift + 1~9, 0`                                                               | Move window to workspace 1~10 (silently) |
-| `Ctrl + Super + Alt + 1~9, 0`                                                          | Move window to workspace group           |
-| `Super + Alt + S`, `Ctrl + Super + Shift + Up`                                         | Move window to special workspace         |
-| `Ctrl + Super + Shift + Down`                                                          | Move window out of special workspace     |
-| `Super + Alt + Scroll Down`, `Super + Alt + Page_Down`, `Ctrl + Super + Shift + Right` | Move window to next workspace            |
-| `Super + Alt + Scroll Up`, `Super + Alt + Page_Up`, `Ctrl + Super + Shift + Left`      | Move window to previous workspace        |
-| `Super + Scroll Down`, `Ctrl + Super + Right`, `Super + Page_Down`                     | Go to next workspace                     |
-| `Super + Scroll Up`, `Ctrl + Super + Left`, `Super + Page_Up`                          | Go to previous workspace                 |
-| `Ctrl + Super + Scroll Down`                                                           | Go to next workspace group               |
-| `Ctrl + Super + Scroll Up`                                                             | Go to previous workspace group           |
+`caelestia update` manages upstream files and generated theme files; reapply the NOIR profile after such updates if they overwrite its colors. To keep a strict monochrome palette, keep `services.smartScheme` disabled and avoid replacing the saved palette with another scheme.
 
----
-
-### Window groups
-
-| Keybind                    | Action                         |
-| -------------------------- | ------------------------------ |
-| `Alt + Tab`                | Go to next window in group     |
-| `Shift + Alt + Tab`        | Go to previous window in group |
-| `Ctrl + Alt + Tab`         | Go to next group               |
-| `Ctrl + Shift + Alt + Tab` | Go to previous group           |
-| `Super + U`                | Move window out of group       |
-| `Super + Comma`            | Toggle group                   |
-| `Super + Shift + Comma`    | Lock active group              |
-
----
-
-### Window actions
-
-| Keybind                                       | Action                                       |
-| --------------------------------------------- | -------------------------------------------- |
-| `Super + Minus`, `Super + Alt + Left`         | Move window split left                       |
-| `Super + Equal`, `Super + Alt + Right`        | Move window split right                      |
-| `Super + Shift + Minus`, `Super + Alt + Up`   | Move window split up                         |
-| `Super + Shift + Equal`, `Super + Alt + Down` | Move window split down                       |
-| `Super + Left/Right/Up/Down`                  | Focus window in direction                    |
-| `Super + Shift + Left/Right/Up/Down`          | Move window in direction                     |
-| `Super + LMB`, `Super + Z + LMB`              | Move window (drag)                           |
-| `Super + RMB`, `Super + X + LMB`              | Resize window (drag)                         |
-| `Ctrl + Super + Backslash`                    | Center window                                |
-| `Ctrl + Super + Alt + Backslash`              | Resize window to 55×70% of screen and center |
-| `Super + Alt + Backslash`                     | Enable picture-in-picture mode for window    |
-| `Super + P`                                   | Toggle pinned mode for window                |
-| `Super + F`                                   | Toggle fullscreen mode for window            |
-| `Super + Alt + F`                             | Toggle maximised mode for window             |
-| `Super + Alt + Space`                         | Toggle floating mode for window              |
-| `Super + Q`                                   | Close window                                 |
-
----
-
-### Special workspace toggles
-
-| Keybind                 | Action                          |
-| ----------------------- | ------------------------------- |
-| `Super + S`             | Toggle special workspace        |
-| `Ctrl + Shift + Escape` | Toggle system monitor workspace |
-| `Super + M`             | Toggle music workspace          |
-| `Super + D`             | Toggle communication workspace  |
-| `Super + R`             | Toggle todo workspace           |
-
----
-
-### Applications
-
-| Keybind          | Action                                |
-| ---------------- | ------------------------------------- |
-| `Super + T`      | Terminal (default: foot)              |
-| `Super + W`      | Browser (default: firefox)            |
-| `Super + C`      | Editor (default: codium)              |
-| `Super + E`      | File explorer (default: thunar)       |
-| `Ctrl + Alt + V` | Audio settings (default: pwvucontrol) |
-
----
-
-### Utilities
-
-| Keybind                   | Action              |
-| ------------------------- | ------------------- |
-| `Print`                   | Screenshot          |
-| `Super + Shift + S`       | Screenshot (freeze) |
-| `Super + Shift + Alt + S` | Screenshot (region) |
-| `Ctrl + Alt + R`          | Record fullscreen   |
-| `Super + Alt + R`         | Record with sound   |
-| `Super + Shift + Alt + R` | Record region       |
-| `Super + Shift + C`       | Colour picker       |
-
----
-
-### Media
-
-| Keybind                    | Action         |
-| -------------------------- | -------------- |
-| `Ctrl + Super + Space`     | Play/pause     |
-| `Ctrl + Super + Equal`     | Next track     |
-| `Ctrl + Super + Minus`     | Previous track |
-| `Ctrl + Super + Backspace` | Stop playback  |
-| `Super + Shift + M`        | Mute volume    |
-
----
-
-### Miscellaneous
-
-| Keybind               | Action                    |
-| --------------------- | ------------------------- |
-| `Ctrl + Alt + Delete` | Open shell session menu   |
-| `Super + N`           | Toggle shell sidebar      |
-| `Ctrl + Alt + C`      | Clear shell notifications |
-| `Super + K`           | Show all shell panels     |
-| `Super + L`           | Lock screen               |
-| `Super + Alt + L`     | Restore shell lockscreen  |
-| `Super + Shift + L`   | Run sleep command         |
-
----
-
-### Clipboard / Emoji
-
-| Keybind                  | Action                               |
-| ------------------------ | ------------------------------------ |
-| `Super + V`              | Open clipboard history               |
-| `Super + Alt + V`        | Open clipboard history (delete mode) |
-| `Ctrl + Shift + Alt + V` | Paste latest clipboard entry         |
-| `Super + Period`         | Open emoji picker                    |
-
----
-
-### Shell
-
-| Keybind                    | Action        |
-| -------------------------- | ------------- |
-| `Ctrl + Super + Alt + R`   | Restart shell |
-| `Ctrl + Super + Shift + R` | Kill shell    |
-
-[shell-repo]: https://github.com/caelestia-dots/shell
-[cli-repo]: https://github.com/caelestia-dots/cli
+Caelestia's GPL-3.0 license and original attribution are retained in [LICENSE](LICENSE). NOIR additions are distributed under the same license. See [the upstream project](https://github.com/caelestia-dots/caelestia) for base installation, all keybindings and package integration.
